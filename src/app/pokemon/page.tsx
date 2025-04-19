@@ -1,31 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { getListaPokemons } from '@/api/pokemonService'; // Importando a função da API
 
 export default function Pokemon() {
   const [pokemons, setPokemons] = useState<any[]>([]);
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
-    const buscarPokemons = async () => {
-      try {
-        const res = await fetch('https://pokeapi.co/api/v2/pokemon?limit=10');
-        const data = await res.json();
-
-        const promessas = data.results.map(async (p: any) => {
-          const resDetalhe = await fetch(p.url);
-          return await resDetalhe.json();
-        });
-
-        const pokemonsDetalhados = await Promise.all(promessas);
-        setPokemons(pokemonsDetalhados);
-        setCarregando(false);
-      } catch (erro) {
-        console.error('Erro ao buscar pokémons:', erro);
-      }
-    };
-
-    buscarPokemons();
+    getListaPokemons()
+      .then(setPokemons)
+      .catch((err) => console.error('Erro ao buscar pokémons:', err))
+      .finally(() => setCarregando(false));
   }, []);
 
   if (carregando) {
@@ -39,7 +25,7 @@ export default function Pokemon() {
         {pokemons.map((pokemon) => (
           <div
             key={pokemon.id}
-            className="bg-white shadow-md rounded-xl w-1xl p-4 text-center"
+            className="bg-white shadow-md rounded-xl p-4 text-center"
           >
             <img
               src={pokemon.sprites.front_default}
